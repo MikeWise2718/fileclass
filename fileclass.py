@@ -10,13 +10,22 @@ parser.add_argument('--sdir', type=str, default=".",   help='source directory',r
 args = parser.parse_args()
 
 
+def get_files(base_dir):
+    for entry in os.scandir(base_dir):
+        if entry.is_file():
+            yield entry
+        elif entry.is_dir():
+            yield from get_files(entry.path)
+        else:
+            print(f"Neither a file, nor a dir: {entry.path}")
+
 def buildExtDicts(sdir):
     dicts = {}
-    for entry in os.scandir(sdir):
+    for entry in get_files(sdir):
         if entry.is_dir():
             print(f"dir:{entry.path}")
         elif entry.is_file():
-            print(f"file{entry.path}")
+            print(f"file:{entry.path}")
            
     return 
 
