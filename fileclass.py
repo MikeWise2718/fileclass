@@ -78,6 +78,8 @@ class FileClass:
                 self.digestEntry(entry)
         return 
 
+    def getSortedExtDict(sortkey):
+        return
 
     def dumpExtDicts(self):
         lgg.info(f"  dumpExtDicts",lgg.cP)  
@@ -89,14 +91,14 @@ class FileClass:
             nfilesext = exd["num"]
             nbytesext = exd["bytes"]
             maxbytesext = exd["maxbytes"]
-            avgbytesext = round(maxbytesext/nfilesext,0)
+            avgbytesext = int(maxbytesext/nfilesext)
             cls = self.getClass(extkey)
             nfiles += nfilesext
             nbytes += nbytesext
-            mbytes = round(nbytesext/1e6,3)
+            mbytes = "%.3f" % round(nbytesext/1e6,3)
             extkeypad = extkey.rjust(mxkeylen)
-            lgg.info(f"  {extkeypad} {cls:>6} - num:{nfilesext:>4}  sizecls-max:{maxbytesext:>10} avg:{avgbytesext:>10}  tot-mb:{mbytes:>6}",lgg.cB)
-        mbytes = round(nbytes / 1e6,3)
+            lgg.info(f"  {extkeypad} {cls:>6} - num:{nfilesext:>4}  size-max:{maxbytesext:>10} avg:{avgbytesext:>10}  tot-mb:{mbytes:>9}",lgg.cB)
+        mbytes = "%.3f" %  round(nbytes / 1e6,3)
         lgg.info(f"totals - files{nfiles} bytes:{nbytes} mb:{mbytes}",lgg.cB)
 
     def buildClsDicts(self):
@@ -121,9 +123,9 @@ class FileClass:
             nbytescls = cld["bytes"]
             nfiles += nfilescls
             nbytes += nbytescls
-            mbytes = round(nbytescls/1e6,3)
-            lgg.info(f"  {clskey:>6} - num:{nfilescls:>4}    tot-mb:{mbytes:>6}",lgg.cG)            
-        mbytes = round(nbytes / 1e6,3)
+            mbytes = "%.3f" % round(nbytescls/1e6,3)
+            lgg.info(f"  {clskey:>6} - num:{nfilescls:>4}    tot-mb:{mbytes:>9}",lgg.cG)            
+        mbytes = "%.3f" % round(nbytes / 1e6,3)
         lgg.info(f"totals - files{nfiles} bytes:{nbytes} mb:{mbytes}",lgg.cG)
 
     def main(self):
