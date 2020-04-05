@@ -13,6 +13,7 @@ class FileClass:
 
     extDicts = {}
     clsDicts = {}
+    bigFileList = []
 
     ignoreDirList = (".git","Library")
     classExtLists = {"lfs":(".obj",".tiff")}
@@ -42,7 +43,8 @@ class FileClass:
             exd["maxbytes"] = esize
             exd["maxname"] = entry.path
         if esize>10e6:
-            emb = round(esize/1e6,3)
+            self.bigFileList.append(entry)
+            emb = "%.3f" % round(esize/1e6,3)
             lgg.info(f"    big file: {emb} mb - {entry.path}")
 
 
@@ -78,15 +80,19 @@ class FileClass:
                 self.digestEntry(entry)
         return 
 
-    def getSortedExtDict(sortkey):
-        return
+    def getSortedExtDict(self,sortkey):
+        # black magic
+        rv = {k: v for k, v in sorted(self.extDicts.items(), key=lambda item: item[1][sortkey])}
+        return rv
 
     def dumpExtDicts(self):
         lgg.info(f"  dumpExtDicts",lgg.cP)  
         nfiles = 0
         nbytes = 0        
         mxkeylen = self.getLongestExtKeyLength()
-        for extkey in self.extDicts.keys():
+        sortedExtDict = self.getSortedExtDict("bytes")
+        #for extkey in self.extDicts.keys():
+        for extkey in sortedExtDict:            
             exd = self.extDicts[extkey]
             nfilesext = exd["num"]
             nbytesext = exd["bytes"]
