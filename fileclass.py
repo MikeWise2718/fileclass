@@ -12,24 +12,38 @@ class FileClass:
     args = parser.parse_args()
 
     extDicts = {}
+    clsDicts = {}
 
     ignoreDirList = (".git","Library")
-    classDicts = {"lfs":(".obj",".tiff")}
+    classExtLists = {"lfs":(".obj",".tiff")}
 
     def getClass(self,ext):
-        for key in self.classDicts.keys():
-            if ext in self.classDicts[key]:
+        for key in self.classExtLists.keys():
+            if ext in self.classExtLists[key]:
                 return key
         return "rest"
 
+    def getLongestExtKeyLength(self):
+        mxkeylen = 0
+        for key in self.extDicts:
+            if len(key)>mxkeylen:
+                mxkeylen = len(key)
+        return mxkeylen
 
     def digestEntry(self, entry:os.DirEntry ):
         _,ext = os.path.splitext(entry.name)
         if not ext in self.extDicts:
-            self.extDicts[ext] = { "num":0, "bytes":0 }
-        extdict = self.extDicts[ext]
-        extdict["num"] += 1
-        extdict["bytes"] += entry.stat().st_size
+            self.extDicts[ext] = { "num":0, "bytes":0,"maxbytes":0,"maxname":"" }
+        exd = self.extDicts[ext]
+        exd["num"] += 1
+        esize = entry.stat().st_size
+        exd["bytes"] += esize
+        if esize>exd["maxbytes"]:
+            exd["maxbytes"] = esize
+            exd["maxname"] = entry.path
+        if esize>10e6:
+            emb = round(esize/1e6,3)
+            lgg.info(f"    big file: {emb} mb - {entry.path}")
 
 
     def isToBeIgnored(self,entry:os.DirEntry):
@@ -54,7 +68,7 @@ class FileClass:
 
 
     def buildExtDicts(self,sdir):
-        lgg.info(f"  buildExtDicts",lgg.cP)          
+        lgg.info(f"  buildExtDicts dir:{sdir}",lgg.cP)          
         self.extDicts = {}
         for entry in self.getFiles(sdir):
             if entry.is_dir():
@@ -64,21 +78,53 @@ class FileClass:
                 self.digestEntry(entry)
         return 
 
+
     def dumpExtDicts(self):
         lgg.info(f"  dumpExtDicts",lgg.cP)  
         nfiles = 0
         nbytes = 0        
-        for key in self.extDicts.keys():
-            exd = self.extDicts[key]
+        mxkeylen = self.getLongestExtKeyLength()
+        for extkey in self.extDicts.keys():
+            exd = self.extDicts[extkey]
             nfilesext = exd["num"]
             nbytesext = exd["bytes"]
-            cls = self.getClass(key)
+            maxbytesext = exd["maxbytes"]
+            avgbytesext = round(maxbytesext/nfilesext,0)
+            cls = self.getClass(extkey)
             nfiles += nfilesext
             nbytes += nbytesext
             mbytes = round(nbytesext/1e6,3)
-            lgg.info(f"  {key:>8} {cls:>6} - num:{nfilesext:>4}  bytes:{nbytesext:>8}   mb:{mbytes:>6}",lgg.cW)
+            extkeypad = extkey.rjust(mxkeylen)
+            lgg.info(f"  {extkeypad} {cls:>6} - num:{nfilesext:>4}  sizecls-max:{maxbytesext:>10} avg:{avgbytesext:>10}  tot-mb:{mbytes:>6}",lgg.cB)
         mbytes = round(nbytes / 1e6,3)
-        lgg.info(f"totals - files{nfiles} bytes:{nbytes} mb:{mbytes}",lgg.cW)
+        lgg.info(f"totals - files{nfiles} bytes:{nbytes} mb:{mbytes}",lgg.cB)
+
+    def buildClsDicts(self):
+        lgg.info(f"  buildClsDicts",lgg.cP)          
+        self.clsDicts = {}
+        for extkey in self.extDicts.keys():
+            exd = self.extDicts[extkey]
+            clskey = self.getClass(extkey)
+            if not clskey in self.clsDicts:
+                self.clsDicts[clskey] = { "num":0, "bytes":0 }
+            cld = self.clsDicts[clskey]
+            cld["num"] += exd["num"]
+            cld["bytes"] += exd["bytes"]
+
+    def dumpClsDicts(self):
+        lgg.info(f"  dumpClsDicts",lgg.cP)  
+        nfiles = 0
+        nbytes = 0        
+        for clskey in self.clsDicts.keys():
+            cld = self.clsDicts[clskey]
+            nfilescls = cld["num"]
+            nbytescls = cld["bytes"]
+            nfiles += nfilescls
+            nbytes += nbytescls
+            mbytes = round(nbytescls/1e6,3)
+            lgg.info(f"  {clskey:>6} - num:{nfilescls:>4}    tot-mb:{mbytes:>6}",lgg.cG)            
+        mbytes = round(nbytes / 1e6,3)
+        lgg.info(f"totals - files{nfiles} bytes:{nbytes} mb:{mbytes}",lgg.cG)
 
     def main(self):
         sdir = self.args.sdir
@@ -88,6 +134,8 @@ class FileClass:
         stime = timeit.time.time()
         self.buildExtDicts(sdir)
         self.dumpExtDicts()
+        self.buildClsDicts()
+        self.dumpClsDicts()
 
         # (ovfiles,ovbytes) = copyFromTo(sdir,ddir,execute)
         elap = timeit.time.time()-stime 

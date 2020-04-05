@@ -10,7 +10,7 @@
             "console": "integratedTerminal"
         },
         {
-            "name": "Python: fileclass",
+            "name": "Python: testdir",
             "type": "python",
             "request": "launch",
             "program": "${file}",
