@@ -86,7 +86,7 @@ class FileClass:
         return rv
 
     def dumpExtDicts(self):
-        lgg.info(f"  dumpExtDicts",lgg.cP)  
+        lgg.info(f"  dumpExtDicts",lgg.cP)  cd
         nfiles = 0
         nbytes = 0        
         mxkeylen = self.getLongestExtKeyLength()
