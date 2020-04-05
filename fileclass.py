@@ -66,20 +66,23 @@ def dumpExtDicts():
     mbytes = nbytes / 1e6
     lgg.info(f"totals - files{nfiles} bytes:{nbytes} mb:{mbytes}",lgg.cW)
 
+def main():
+    sdir = args.sdir
 
-sdir = args.sdir
+    lgg.info(f"FileClassing {sdir}",lgg.cY)
 
-lgg.info(f"FileClassing {sdir}",lgg.cY)
+    stime = timeit.time.time()
+    buildExtDicts(sdir)
+    dumpExtDicts()
 
-stime = timeit.time.time()
-buildExtDicts(sdir)
-dumpExtDicts()
+    # (ovfiles,ovbytes) = copyFromTo(sdir,ddir,execute)
+    etime = timeit.time.time()
+    elap = etime-stime 
 
-# (ovfiles,ovbytes) = copyFromTo(sdir,ddir,execute)
-etime = timeit.time.time()
-elap = etime-stime 
+    #exword = "" if execute else "Would have "
+    #lgg.info(f"{exword} Overwritten files:{ovfiles}/{tfiles}  overwritenbytes:{ovbytes} secs:{round(elap,3)} ",lgg.cY)
+    # print(f"stime:{stime} etime:{etime} elap:{elap}")
+    lgg.info(f"file class done - secs:{round(elap,3)} ",lgg.cY)
 
-#exword = "" if execute else "Would have "
-#lgg.info(f"{exword} Overwritten files:{ovfiles}/{tfiles}  overwritenbytes:{ovbytes} secs:{round(elap,3)} ",lgg.cY)
-# print(f"stime:{stime} etime:{etime} elap:{elap}")
-lgg.info(f"file class done - secs:{round(elap,3)} ",lgg.cY)
+if __name__ == "__main__":
+    main()
