@@ -25,8 +25,6 @@ class FileClass:
 
     def digestEntry(self, entry:os.DirEntry ):
         _,ext = os.path.splitext(entry.name)
-        if ext=="":
-            print(entry.path)
         if not ext in self.extDicts:
             self.extDicts[ext] = { "num":0, "bytes":0 }
         extdict = self.extDicts[ext]
@@ -38,7 +36,7 @@ class FileClass:
         if not entry.is_dir():
             return False
         if entry.name in self.ignoreDirList:
-            lgg.info(f"  Ignoring {entry.name}",lgg.cR)
+            lgg.info(f"    Ignoring {entry.name}",lgg.cR)
             return True
         return False
 
@@ -48,7 +46,7 @@ class FileClass:
             if entry.is_file():
                 yield entry
             elif entry.is_dir():
-                print(entry.name)
+                lgg.info(f"    Directory {entry.name}",lgg.cC)
                 if not self.isToBeIgnored(entry):
                     yield from self.getFiles(entry.path)
             else:
@@ -56,18 +54,18 @@ class FileClass:
 
 
     def buildExtDicts(self,sdir):
-        lgg.info(f"buildExtDicts",lgg.cW)          
+        lgg.info(f"  buildExtDicts",lgg.cP)          
         self.extDicts = {}
         for entry in self.getFiles(sdir):
             if entry.is_dir():
-                lgg.info(f"  dir:{entry.path}",lgg.cB)
+                lgg.info(f"    dir:{entry.path}",lgg.cB)
             elif entry.is_file():
                 # lgg.info(f"  file:{entry.path}",lgg.cC)
                 self.digestEntry(entry)
         return 
 
     def dumpExtDicts(self):
-        lgg.info(f"dumpExtDicts",lgg.cW)  
+        lgg.info(f"  dumpExtDicts",lgg.cP)  
         nfiles = 0
         nbytes = 0        
         for key in self.extDicts.keys():
